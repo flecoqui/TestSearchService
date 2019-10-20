@@ -520,6 +520,18 @@
       },
       "resources": [
         {
+          "type": "siteextensions",
+          "name": "extensions-as/AspNetCoreRuntime.3.0.x86",
+          "apiVersion": "2015-04-01",
+          "location": "[resourceGroup().location]",
+          "properties": {
+              "version": "3.0.0"
+          },
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', variables('webAppName'))]"
+          ]
+        },
+        {
           "type": "config",
           "apiVersion": "2016-08-01",
           "name": "web",
@@ -573,6 +585,7 @@
             "IsManualIntegration": true
           }
         }
+
       ],
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
