@@ -612,21 +612,17 @@
     }
   ],
   "outputs": {
-    "curlCmdAzWeb1": {
-      "type": "string",
-      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   https://',variables('webAppName'),'.azurewebsites.net/api/values')]"
-    },
-    "curlCmdAzWeb2": {
-      "type": "string",
-      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   https://',variables('webAppName'),'.azurewebsites.net/api/test')]"
-    },
     "curlCmdAzFunction1": {
       "type": "string",
-      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   https://',variables('azFunctionName'),'.azurewebsites.net/api/values')]"
+      "value": "[concat('curl -d \"{\\\"param1\\\":\\\"0123456789\\\",\\\"param2\\\":\\\"abcdef\\\"}\" -H \"Content-Type: application/json\"  -X POST   \"https://',variables('azFunctionName'),'.azurewebsites.net/api/HttpTriggerPythonFunction\"')]"
     },
     "curlCmdAzFunction2": {
       "type": "string",
-      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   https://',variables('azFunctionName'),'.azurewebsites.net/api/test')]"
+      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   \"https://',variables('azFunctionName'),'.azurewebsites.net/api/HttpTriggerPythonFunction?param1=0123456789&param2=abcdef\"')]"
+    },
+    "curlCmdAzWeb2": {
+      "type": "string",
+      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   https://',variables('webAppName'),'.azurewebsites.net/')]"
     }
   }
 }
