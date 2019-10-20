@@ -118,15 +118,13 @@
     "azFunctionName": "[concat(parameters('namePrefix'), 'function')]",
     "appServicePlanName": "[concat(parameters('namePrefix'), 'webplan')]",
     "webAppName": "[concat(parameters('namePrefix'), 'web')]",
-    "vmName": "[concat(parameters('namePrefix'), 'vm')]",
-    "vmSize": "[variables('configurationSize').vmSize]",
-    "vmDataDiskSize": "[variables('configurationSize').diskSize]",
+    "appInsightName":  "[concat(parameters('namePrefix'), 'insight')]",
     "searchReplicaCount": "1",
     "searchPartitionCount": "1",
     "searchHostingMode": "default",
     "apiVersion": "2015-06-15",
     "storageNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
-    "storageName": "[concat(variables('storageNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageAccountNamePrefix'))),'sa')]",
+    "storageName": "[concat(variables('storageNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageNamePrefix'))),'sa')]",
     "azFuncSku": {
       "y1": {
         "name": "Y1",
@@ -345,7 +343,7 @@
       "type": "Microsoft.Search/searchServices",
       "name": "[concat(parameters('namePrefix'),'search')]",
       "apiVersion": "2015-08-19",
-      "location": "[resourceGroup().lo  cation]",
+      "location": "[resourceGroup().location]",
       "properties": {
         "replicaCount": "[variables('searchReplicaCount')]",
         "partitionCount": "[variables('searchPartitionCount')]",
@@ -515,7 +513,7 @@
             {
               "name": "Project",
               "value": "[parameters('repoWebAppPath')]"
-            },
+            }
           ]
         }
 
@@ -587,7 +585,7 @@
     {
       "type": "microsoft.insights/components",
       "apiVersion": "2015-05-01",
-      "name": "[variables('azFunctionInsightName')]",
+      "name": "[variables('appInsightName')]",
       "location": "[resourceGroup().location]",
       "kind": "web",
       "tags": {
@@ -629,14 +627,6 @@
     "curlCmdAzFunction2": {
       "type": "string",
       "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   https://',variables('azFunctionName'),'.azurewebsites.net/api/test')]"
-    },
-    "curlCmdVM1": {
-      "type": "string",
-      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com/api/values')]"
-    },
-    "curlCmdVM2": {
-      "type": "string",
-      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com/api/test')]"
     }
   }
 }
