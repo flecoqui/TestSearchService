@@ -114,9 +114,8 @@
     "location": "[resourceGroup().location]",
     "adlsName": "[concat(parameters('namePrefix'), 'adls')]",
     "databaseName": "[concat(parameters('namePrefix'), 'db')]",
-    "azFunctionPlanName": "[concat(parameters('namePrefix'), 'functplan')]",
+    "servicePlanName": "[concat(parameters('namePrefix'), 'plan')]",
     "azFunctionName": "[concat(parameters('namePrefix'), 'function')]",
-    "appServicePlanName": "[concat(parameters('namePrefix'), 'webplan')]",
     "webAppName": "[concat(parameters('namePrefix'), 'web')]",
     "appInsightName":  "[concat(parameters('namePrefix'), 'insight')]",
     "searchReplicaCount": "1",
@@ -356,27 +355,24 @@
     {
       "type": "Microsoft.Web/serverfarms",
       "sku": {
-        "name": "[toLower(variables('azFuncSku')[toLower(parameters('azFunctionAppSku'))].name)]",
-        "tier": "[variables('azFuncSku')[toLower(parameters('azFunctionAppSku'))].tier]",
-        "size": "[variables('azFuncSku')[toLower(parameters('azFunctionAppSku'))].size]",
-        "family": "[variables('azFuncSku')[toLower(parameters('azFunctionAppSku'))].family]",
-        "capacity": "[variables('azFuncSku')[toLower(parameters('azFunctionAppSku'))].capacity]"
+        "name": "[toLower(parameters('webAppSku'))]",
+        "capacity": 1
       },
-      "kind": "functionapp",
-      "name": "[variables('azFunctionPlanName')]",
+      "kind": "linux",
+      "name": "[variables('servicePlanName')]",
       "apiVersion": "2016-09-01",
       "location": "[resourceGroup().location]",
       "properties": {
-        "name": "[variables('azFunctionPlanName')]",
+        "name": "[variables('servicePlanName')]",
         "perSiteScaling": false,
-        "reserved": false,
+        "reserved": true,
         "targetWorkerCount": 0,
         "targetWorkerSizeId": 0
       },
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
         "[resourceId('Microsoft.DataLakeStore/accounts', variables('adlsName'))]",
-        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseName'))]"        
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseName'))]"   
       ]
     },
     {
@@ -386,36 +382,66 @@
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
-        "[resourceId('Microsoft.Web/serverfarms', variables('azFunctionPlanName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
-        "[resourceId('Microsoft.DataLakeStore/accounts', variables('adlsName'))]",
-        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseName'))]"   
+        "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightName'))]"
       ],
-      "kind": "functionapp",
+      "kind": "functionapp,linux,container",
       "properties": {
         "enabled": true,
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('azFunctionPlanName'))]",
+        "hostNameSslStates": [
+          {
+            "name": "[concat(variables('azFunctionName'), '.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "hostType": "Standard"
+          },
+          {
+            "name": "[concat(variables('azFunctionName'), '.scm.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "hostType": "Repository"
+          }
+        ],
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
+        "reserved": true,
+        "scmSiteAlsoStopped": false,
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 0,
+        "dailyMemoryTimeQuota": 0,
+        "httpsOnly": false,
         "siteConfig": {
           "appSettings": [
-            {
-              "name": "inputFolder",
-              "value": "[variables('inputFolder')]"
-            },
-            {
-              "name": "outputFolder",
-              "value": "[variables('outputFolder')]"
-            },
             {
               "name": "Project",
               "value": "[parameters('repoFunctionPath')]"
             },
             {
               "name": "FUNCTIONS_EXTENSION_VERSION",
-              "value": "~1"
+              "value": "~2"
             },
             {
-              "name": "ROUTING_EXTENSION_VERSION",
-              "value": "~0.1"
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "10.14.1"
+            },
+            {
+              "name": "BUILD_FLAGS",
+              "value": "UseExpressBuild"
+            },
+            {
+              "name": "ENABLE_ORYX_BUILD",
+              "value": "true"
+            },
+            {
+              "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+              "value": "1"
+            },
+            {
+              "name": "XDG_CACHE_HOME",
+              "value": "/tmp/.cache"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "python"
             },
             {
               "name": "AzureWebJobsDashboard",
@@ -424,8 +450,32 @@
             {
               "name": "AzureWebJobsStorage",
               "value": "[concat('DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=', variables('storageName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')),'2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listKeys(variables('storageName'),'2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(variables('azFunctionName'))]"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('microsoft.insights/components/', variables('appInsightName')), '2015-05-01').InstrumentationKey]"
             }
-          ]
+          ],
+          "linuxFxVersion": "DOCKER|mcr.microsoft.com/azure-functions/python:2.0-python3.6-appservice",
+          "numberOfWorkers": 1,
+          "use32BitWorkerProcess": true,
+          "alwaysOn": true,
+          "cors": {
+            "allowedOrigins": [
+              "https://functions.azure.com",
+              "https://functions-staging.azure.com",
+              "https://functions-next.azure.com"
+            ],
+            "supportCredentials": false
+          }
         }
       },
       "resources": [
@@ -445,30 +495,8 @@
         }
       ]
 
-    },    
-    {
-      "type": "Microsoft.Web/serverfarms",
-      "sku": {
-        "name": "[toLower(parameters('webAppSku'))]",
-        "capacity": 1
-      },
-      "kind": "linux",
-      "name": "[variables('appServicePlanName')]",
-      "apiVersion": "2016-09-01",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "name": "[variables('appServicePlanName')]",
-        "perSiteScaling": false,
-        "reserved": true,
-        "targetWorkerCount": 0,
-        "targetWorkerSizeId": 0
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
-        "[resourceId('Microsoft.DataLakeStore/accounts', variables('adlsName'))]",
-        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseName'))]"   
-      ]
-    },
+    }, 
+
 
     {
       "type": "Microsoft.Web/sites",
@@ -488,17 +516,17 @@
         ],
         "hostNameSslStates": [
           {
-              "name": "[concat(parameters('sites_testdotnetcore3wvd_name'), '.azurewebsites.net')]",
+              "name": "[concat(variables('webAppName'), '.azurewebsites.net')]",
               "sslState": "Disabled",
               "hostType": "Standard"
           },
           {
-              "name": "[concat(parameters('sites_testdotnetcore3wvd_name'), '.scm.azurewebsites.net')]",
+              "name": "[concat(variables('webAppName'), '.scm.azurewebsites.net')]",
               "sslState": "Disabled",
               "hostType": "Repository"
           }
         ],
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
         "reserved": true,
         "scmSiteAlsoStopped": false,
         "clientAffinityEnabled": false,
@@ -520,6 +548,14 @@
             {
               "name": "Project",
               "value": "[parameters('repoWebAppPath')]"
+            },
+            {
+              "name": "WEBSITE_DYNAMIC_CACHE",
+              "value": "0"
+            },
+            {
+              "name": "WEBSITE_LOCAL_CACHE_OPTION",
+              "value": "Never"
             }
           ]
         }
@@ -558,7 +594,7 @@
             "httpLoggingEnabled": false,
             "logsDirectorySizeLimit": 35,
             "detailedErrorLoggingEnabled": false,
-            "scmType": "GitHub",
+           
             "use32BitWorkerProcess": true,
             "webSocketsEnabled": false,
             "alwaysOn": true,
@@ -634,7 +670,7 @@
 
       ],
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
         "[resourceId('Microsoft.DataLakeStore/accounts', variables('adlsName'))]",
         "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseName'))]"   
