@@ -115,6 +115,7 @@
     "adlsName": "[concat(parameters('namePrefix'), 'adls')]",
     "databaseName": "[concat(parameters('namePrefix'), 'db')]",
     "servicePlanName": "[concat(parameters('namePrefix'), 'plan')]",
+    "webAppPlanName": "[concat(parameters('namePrefix'), 'webplan')]",
     "azFunctionName": "[concat(parameters('namePrefix'), 'function')]",
     "webAppName": "[concat(parameters('namePrefix'), 'web')]",
     "appInsightName":  "[concat(parameters('namePrefix'), 'insight')]",
@@ -307,6 +308,27 @@
       ]
     },
     {
+      "type": "Microsoft.Web/serverfarms",
+      "sku": {
+        "name": "[toLower(parameters('webAppSku'))]",
+        "capacity": 1
+      },
+      "kind": "linux",
+      "name": "[variables('webAppPlanName')]",
+      "apiVersion": "2016-09-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "name": "[variables('webAppPlanName')]",
+        "perSiteScaling": false,
+        "reserved": true,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+      ]
+    },
+    {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2016-08-01",
       "name": "[variables('azFunctionName')]",
@@ -488,7 +510,7 @@
         "fileChangeAuditEnabled": false,
         "functionsRuntimeScaleMonitoringEnabled": false
       }
-  },
+    },
 
  
     {
