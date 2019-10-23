@@ -9,41 +9,46 @@
 
 This template allows you to deploy from Github a Search backend based on Azure Search, Azure Function, Azure Cosmos, Azure Storage and AZure Data Lake.
 The Azure Functions are Python Azure Function. The Web App is based on ASP.NET core version 3.0 with the support of an Azure Active Directory Authentication.
-Once the backend is deployed, it's possible to test the AZure Function using the following curl commands:
-
-          curl -d "{\"param1\":\"0123456789\",\"param2\":\"abcdef\"}" -H "Content-Type: application/json"  -X POST   "https://<prefixName>function.azurewebsites.net/api/HttpTriggerPythonFunction"
-		  curl -H "Content-Type: application/json"  -X GET   "https://<prefixName>function.azurewebsites.net/api/HttpTriggerPythonFunction?param1=0123456789&param2=abcdef" 
 
 
 ![](https://raw.githubusercontent.com/flecoqui/TestSearchService/master/Docs/1-architecture.png)
 
 
+Once the backend is deployed, it's possible to test the AZure Function using the following curl commands:
+
+			curl -d "{\"param1\":\"0123456789\",\"param2\":\"abcdef\"}" -H "Content-Type: application/json"  -X POST   "https://<prefixName>function.azurewebsites.net/api/HttpTriggerPythonFunction"
+			
+			curl -H "Content-Type: application/json"  -X GET   "https://<prefixName>function.azurewebsites.net/api/HttpTriggerPythonFunction?param1=0123456789&param2=abcdef" 
+
+
+
 # DEPLOYING THE SEARCH BACKEND ON AZURE 
 
-This chapter describes how to deploy Search backend using Azure CLI:</p>
+This chapter describes how to deploy Search backend using Azure CLI, the following services will be deployed with few command lines:</p>
 * **Azure App Service**</p>
 * **Azure Function**</p>
 * **Azure Search**</p>
 * **Azure Storage**</p>
 * **Azure Data Lake**</p>
 * **Azure Cosmos**</p>
-in **3 command lines**.
 
 ## PRE-REQUISITES
-First you need an Azure subscription.
+First you need an Azure subscription.</p>
 You can subscribe here:  https://azure.microsoft.com/en-us/free/ . </p>
-Moreover, we will use Azure CLI v2.0 to deploy the resources in Azure.
+Moreover, we will use Azure CLI v2.0 to deploy the resources in Azure.</p>
 You can install Azure CLI on your machine running Linux, MacOS or Windows from here: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest 
 
-The first Azure CLI command will create a resource group.
+The first Azure CLI command will create a resource group.</p>
 The second  Azure CLI command will deploy an Azure Function, an Azure App Service and a Virtual Machine using an Azure Resource Manager Template.
 In order to deploy the source code of the Python Azure Functions from github, unfortunately as today it's not possible to an Azure Resource Manager template to deploy Python source code from github to an Azure Function without using Azure DevOps.
-You need to clone the code locally using the following command:
+* You need to clone the code locally using the following command:
+
 
 			C:\git\Me> git clone https://github.com/flecoqui/TestSearchService.git
+
 			
-Install Python 3.6.8. (https://www.python.org/downloads/) This version of Python is verified with Functions. 3.7 and later versions are not yet supported.
-Install Azure Functions Core Tools version 2.7.1575 (https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2) or a later version.
+* Install Python 3.6.8. (https://www.python.org/downloads/) This version of Python is verified with Functions. 3.7 and later versions are not yet supported.
+* Install Azure Functions Core Tools version 2.7.1575 (https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2) or a later version.
 
 
 ## CREATE RESOURCE GROUP:
@@ -122,8 +127,8 @@ If you want to deploy one single service, you can use the resources below:</p>
 Once the services are deployed, you can test the REST API using Curl. You can download curl from here https://curl.haxx.se/download.html 
 For instance :
 
-          curl -d "{\"param1\":\"0123456789\",\"param2\":\"abcdef\"}" -H "Content-Type: application/json"  -X POST   "https://<prefixName>function.azurewebsites.net/api/HttpTriggerPythonFunction"
-		  curl -H "Content-Type: application/json"  -X GET   "https://<prefixName>function.azurewebsites.net/api/HttpTriggerPythonFunction?param1=0123456789&param2=abcdef" 
+			curl -d "{\"param1\":\"0123456789\",\"param2\":\"abcdef\"}" -H "Content-Type: application/json"  -X POST   "https://<prefixName>function.azurewebsites.net/api/HttpTriggerPythonFunction"
+			curl -H "Content-Type: application/json"  -X GET   "https://<prefixName>function.azurewebsites.net/api/HttpTriggerPythonFunction?param1=0123456789&param2=abcdef" 
 
 </p>
 
