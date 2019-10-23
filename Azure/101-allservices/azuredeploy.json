@@ -42,7 +42,6 @@
       "defaultValue": "S1",
       "allowedValues": [
         "F1",
-        "Y1",
         "B1",
         "B2",
         "B3",
@@ -60,20 +59,9 @@
     },
     "azFunctionAppSku": {
       "type": "string",
-      "defaultValue": "S1",
+      "defaultValue": "Y1",
       "allowedValues": [
-        "F1",
-        "Y1",
-        "B1",
-        "B2",
-        "B3",
-        "S1",
-        "S2",
-        "S3",
-        "P1",
-        "P2",
-        "P3",
-        "P4"
+        "Y1"
       ],
       "metadata": {
         "description": "The SKU of the Azure Function you want to create."
@@ -126,62 +114,86 @@
     "apiVersion": "2015-06-15",
     "storageNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
     "storageName": "[concat(variables('storageNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageNamePrefix'))),'sa')]",
-    "azFuncSku": {
+    "planSku": {
       "y1": {
         "name": "Y1",
         "tier": "Dynamic",
         "size": "Y1",
         "family": "Y",
-        "capacity": 0
+        "capacity": 0,
+        "planKind": "linux",
+        "functionKind": "functionapp,linux",
+        "webKind": "app,linux"
       },
       "d1": {
         "name": "D1",
         "tier": "Shared",
         "size": "D1",
         "family": "D",
-        "capacity": 1
+        "capacity": 1,
+        "planKind": "linux",
+        "functionKind": "functionapp,linux,container",
+        "webKind": "app,linux"
       },
       "f1": {
         "name": "F1",
         "tier": "Free",
         "size": "F1",
         "family": "F",
-        "capacity": 1
+        "capacity": 1,
+        "planKind": "linux",
+        "functionKind": "functionapp,linux,container",
+        "webKind": "app,linux"
       },
       "b1": {
         "name": "B1",
         "tier": "Basic",
         "size": "B1",
         "family": "B",
-        "capacity": 1
+        "capacity": 1,
+        "planKind": "linux",
+        "functionKind": "functionapp,linux,container",
+        "webKind": "app,linux"
       },
       "s1": {
         "name": "S1",
         "tier": "Standard",
         "size": "S1",
         "family": "S",
-        "capacity": 1
+        "capacity": 1,
+        "planKind": "linux",
+        "functionKind": "functionapp,linux,container",
+        "webKind": "app,linux"
       },
       "p1": {
         "name": "P1",
         "tier": "Premium",
         "size": "P1",
         "family": "P",
-        "capacity": 1
+        "capacity": 1,
+        "planKind": "linux",
+        "functionKind": "functionapp,linux,container",
+        "webKind": "app,linux"
       },
       "p1v2": {
         "name": "P1V2",
         "tier": "PremiumV2",
         "size": "P1V2",
         "family": "PV2",
-        "capacity": 1
+        "capacity": 1,
+        "planKind": "linux",
+        "functionKind": "functionapp,linux,container",
+        "webKind": "app,linux"
       },
       "i1": {
         "name": "I1",
         "tier": "Isolated",
         "size": "I1",
         "family": "I",
-        "capacity": 1
+        "capacity": 1,
+        "planKind": "linux",
+        "functionKind": "functionapp,linux,container",
+        "webKind": "app,linux"
       }
     }
   },
@@ -358,10 +370,10 @@
     {
       "type": "Microsoft.Web/serverfarms",
       "sku": {
-        "name": "[toLower(parameters('webAppSku'))]",
-        "capacity": 1
+        "name": "[variables('planSku')[toLower(parameters('webAppSku'))].name]",
+        "capacity": "[variables('planSku')[toLower(parameters('webAppSku'))].capacity]"
       },
-      "kind": "linux",
+      "kind": "[variables('planSku')[toLower(parameters('webAppSku'))].planKind]",
       "name": "[variables('webPlanName')]",
       "apiVersion": "2016-09-01",
       "location": "[resourceGroup().location]",
@@ -381,7 +393,7 @@
     },
     {
       "type": "Microsoft.Web/sites",
-      "kind": "app,linux",
+      "kind": "[variables('planSku')[toLower(parameters('webAppSku'))].webKind]",
       "name": "[variables('webAppName')]",
       "apiVersion": "2016-08-01",
       "location": "[resourceGroup().location]",
@@ -397,14 +409,14 @@
         ],
         "hostNameSslStates": [
           {
-              "name": "[concat(variables('webAppName'), '.azurewebsites.net')]",
-              "sslState": "Disabled",
-              "hostType": "Standard"
+            "name": "[concat(variables('webAppName'), '.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "hostType": "Standard"
           },
           {
-              "name": "[concat(variables('webAppName'), '.scm.azurewebsites.net')]",
-              "sslState": "Disabled",
-              "hostType": "Repository"
+            "name": "[concat(variables('webAppName'), '.scm.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "hostType": "Repository"
           }
         ],
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('webPlanName'))]",
@@ -446,7 +458,7 @@
       ],
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', variables('webPlanName'))]"
-         ]
+      ]
     },
     {
       "apiVersion": "2016-08-01",
@@ -556,41 +568,15 @@
       }
     },
     {
-      "type": "Microsoft.Web/serverfarms",
-      "sku": {
-        "name": "[toLower(parameters('azFunctionAppSku'))]",
-        "capacity": 1
-      },
-      "kind": "functionapp",
-      "name": "[variables('functionPlanName')]",
-      "apiVersion": "2016-09-01",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "name": "[variables('functionPlanName')]",
-        "perSiteScaling": false,
-        "reserved": true,
-        "targetWorkerCount": 0,
-        "targetWorkerSizeId": 0
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
-        "[resourceId('Microsoft.DataLakeStore/accounts', variables('adlsName'))]",
-        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseName'))]",
-        "[resourceId('Microsoft.Search/searchServices', variables('searchName'))]"
-
-      ]
-    },
-    {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2016-08-01",
       "name": "[variables('azFunctionName')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
-        "[resourceId('Microsoft.Web/serverfarms', variables('functionPlanName'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightName'))]"
       ],
-      "kind": "functionapp,linux",
+      "kind": "[variables('planSku')[toLower(parameters('azFunctionAppSku'))].functionKind]",
       "properties": {
         "enabled": true,
         "hostNameSslStates": [

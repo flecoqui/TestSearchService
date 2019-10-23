@@ -131,56 +131,72 @@
         "tier": "Dynamic",
         "size": "Y1",
         "family": "Y",
-        "capacity": 0
+        "capacity": 0,
+        "planKind":"linux",
+        "functionKind":"functionapp,linux"
       },
       "d1": {
         "name": "D1",
         "tier": "Shared",
         "size": "D1",
         "family": "D",
-        "capacity": 1
+        "capacity": 1,
+        "planKind":"linux",
+        "functionKind":"functionapp,linux,container"
       },
       "f1": {
         "name": "F1",
         "tier": "Free",
         "size": "F1",
         "family": "F",
-        "capacity": 1
+        "capacity": 1,
+        "planKind":"linux",
+        "functionKind":"functionapp,linux,container"
       },
       "b1": {
         "name": "B1",
         "tier": "Basic",
         "size": "B1",
         "family": "B",
-        "capacity": 1
+        "capacity": 1,
+        "planKind":"linux",
+        "functionKind":"functionapp,linux,container"
       },
       "s1": {
         "name": "S1",
         "tier": "Standard",
         "size": "S1",
         "family": "S",
-        "capacity": 1
+        "capacity": 1,
+        "planKind":"linux",
+        "functionKind":"functionapp,linux,container"
       },
       "p1": {
         "name": "P1",
         "tier": "Premium",
         "size": "P1",
         "family": "P",
-        "capacity": 1
+        "capacity": 1,
+        "planKind":"linux",
+        "functionKind":"functionapp,linux,container"
       },
       "p1v2": {
         "name": "P1V2",
         "tier": "PremiumV2",
         "size": "P1V2",
         "family": "PV2",
-        "capacity": 1
+        "capacity": 1,
+        "planKind":"linux",
+        "functionKind":"functionapp,linux,container"
       },
       "i1": {
         "name": "I1",
         "tier": "Isolated",
         "size": "I1",
         "family": "I",
-        "capacity": 1
+        "capacity": 1,
+        "planKind":"linux",
+        "functionKind":"functionapp,linux,container"
       }
     }
   },
@@ -289,36 +305,14 @@
     {
       "type": "Microsoft.Web/serverfarms",
       "sku": {
-        "name": "[toLower(parameters('webAppSku'))]",
-        "capacity": 1
+        "name": "[variables('azFuncSku')[toLower(parameters('azFunctionAppSku'))].name]"
       },
-      "kind": "functionapp",
+      "kind": "[variables('azFuncSku')[toLower(parameters('azFunctionAppSku'))].planKind]",
       "name": "[variables('servicePlanName')]",
       "apiVersion": "2016-09-01",
       "location": "[resourceGroup().location]",
       "properties": {
         "name": "[variables('servicePlanName')]",
-        "perSiteScaling": false,
-        "reserved": true,
-        "targetWorkerCount": 0,
-        "targetWorkerSizeId": 0
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Web/serverfarms",
-      "sku": {
-        "name": "[toLower(parameters('webAppSku'))]",
-        "capacity": 1
-      },
-      "kind": "linux",
-      "name": "[variables('webAppPlanName')]",
-      "apiVersion": "2016-09-01",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "name": "[variables('webAppPlanName')]",
         "perSiteScaling": false,
         "reserved": true,
         "targetWorkerCount": 0,
@@ -338,7 +332,7 @@
         "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
         "[resourceId('Microsoft.Insights/components', variables('appInsightName'))]"
       ],
-      "kind": "functionapp,linux",
+      "kind": "[variables('azFuncSku')[toLower(parameters('azFunctionAppSku'))].functionKind]",
       "properties": {
         "enabled": true,
         "hostNameSslStates": [
@@ -397,21 +391,6 @@
 
     }, 
 
-    {
-      "apiVersion": "2016-08-01",
-      "name": "[concat(variables('azFunctionName'), '/web')]",
-      "type": "Microsoft.Web/sites/sourcecontrols",
-      "location":  "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/Sites', variables('azFunctionName'))]",
-        "[concat('Microsoft.Web/Sites/', variables('azFunctionName'),'/config/web')]"
-      ],
-      "properties": {
-        "RepoUrl": "[parameters('repoURL')]",
-        "branch": "[parameters('repoBranch')]",
-        "IsManualIntegration": true
-      }
-    },
     {
       "type": "Microsoft.Web/sites/config",
       "apiVersion": "2016-08-01",
