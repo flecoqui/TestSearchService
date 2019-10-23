@@ -140,3 +140,5 @@ Moreover, you can open the folliwing url with your favorite browser to open the 
 # Next Steps
 
 1. Improve the ASP.NET Web App
+2. Support an architecture with a VNET between the Azure App Service, Azure Storage, Azure Cosmos and Azure Data Lake.
+3. Currently this template only support Python Azure Function running in a consumption plan, the architecture could be improved in supporting other Azure Function Plan.
