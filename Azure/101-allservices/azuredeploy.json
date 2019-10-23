@@ -591,7 +591,6 @@
             "hostType": "Repository"
           }
         ],
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('functionPlanName'))]",
         "reserved": true,
         "scmSiteAlsoStopped": false,
         "clientAffinityEnabled": false,
@@ -642,22 +641,6 @@
       ]
 
     }, 
-
-    {
-      "apiVersion": "2016-08-01",
-      "name": "[concat(variables('azFunctionName'), '/web')]",
-      "type": "Microsoft.Web/sites/sourcecontrols",
-      "location":  "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/Sites', variables('azFunctionName'))]",
-        "[concat('Microsoft.Web/Sites/', variables('azFunctionName'),'/config/web')]"
-      ],
-      "properties": {
-        "RepoUrl": "[parameters('repoURL')]",
-        "branch": "[parameters('repoBranch')]",
-        "IsManualIntegration": true
-      }
-    },
     {
       "type": "Microsoft.Web/sites/config",
       "apiVersion": "2016-08-01",
