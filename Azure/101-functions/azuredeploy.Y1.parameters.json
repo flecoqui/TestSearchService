@@ -12,7 +12,7 @@
       "value": "basic"
     },
     "azFunctionAppSku": {
-      "value": "S1"
+      "value": "Y1"
     },
     "webAppSku": {
       "value": "S1"

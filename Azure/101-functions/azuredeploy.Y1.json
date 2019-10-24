@@ -59,19 +59,9 @@
     },
     "azFunctionAppSku": {
       "type": "string",
-      "defaultValue": "S1",
+      "defaultValue": "Y1",
       "allowedValues": [
-        "F1",
-        "B1",
-        "B2",
-        "B3",
-        "S1",
-        "S2",
-        "S3",
-        "P1",
-        "P2",
-        "P3",
-        "P4"
+        "Y1"
       ],
       "metadata": {
         "description": "The SKU of the Azure Function you want to create."
@@ -310,35 +300,13 @@
       }
     },
     {
-      "type": "Microsoft.Web/serverfarms",
-      "sku": {
-        "name": "[variables('planSku')[toLower(parameters('azFunctionAppSku'))].name]",
-        "capacity": "[variables('planSku')[toLower(parameters('azFunctionAppSku'))].capacity]"
-      },
-      "kind": "[variables('planSku')[toLower(parameters('azFunctionAppSku'))].planKind]",
-      "name": "[variables('functionPlanName')]",
-      "apiVersion": "2016-09-01",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "name": "[variables('functionPlanName')]",
-        "perSiteScaling": false,
-        "reserved": true,
-        "targetWorkerCount": 0,
-        "targetWorkerSizeId": 0
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
-      ]
-    },
-    {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2016-08-01",
       "name": "[variables('azFunctionName')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightName'))]",
-        "[resourceId('Microsoft.Web/serverfarms', variables('functionPlanName'))]"
+        "[resourceId('Microsoft.Insights/components', variables('appInsightName'))]"
       ],
       "kind": "[variables('planSku')[toLower(parameters('azFunctionAppSku'))].functionKind]",
       "properties": {
@@ -355,7 +323,6 @@
             "hostType": "Repository"
           }
         ],
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('functionPlanName'))]",
         "reserved": true,
         "scmSiteAlsoStopped": false,
         "clientAffinityEnabled": false,
@@ -430,7 +397,7 @@
         "phpVersion": "",
         "pythonVersion": "",
         "nodeVersion": "",
-        "linuxFxVersion": "DOCKER|mcr.microsoft.com/azure-functions/python:2.0-python3.6-appservice",
+        "linuxFxVersion": "",
         "requestTracingEnabled": false,
         "remoteDebuggingEnabled": false,
         "httpLoggingEnabled": false,
@@ -440,7 +407,7 @@
         "scmType": "None",
         "use32BitWorkerProcess": true,
         "webSocketsEnabled": false,
-        "alwaysOn": true,
+        "alwaysOn": false,
         "appCommandLine": "",
         "managedPipelineMode": "Integrated",
         "virtualApplications": [
