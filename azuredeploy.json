@@ -449,7 +449,40 @@
             {
               "name": "WEBSITE_LOCAL_CACHE_OPTION",
               "value": "Never"
+            },
+            {
+              "name": "Storage:AccountName",
+              "value": "[variables('storageName')]"
+            },
+            {
+              "name": "Storage:AccountKey",
+              "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')),'2015-05-01-preview').key1]"
+            },
+            {
+              "name": "Search:ServiceName",
+              "value": "[variables('searchName')]"
+            },
+            {
+              "name": "Search:Key",
+              "value": "[listAdminKeys(resourceId('Microsoft.Search/searchServices/', variables('searchName')), '2015-08-19').PrimaryKey]"
+            },
+            {
+              "name": "Cosmos:ServiceName",
+              "value": "[variables('databaseName')]"
+            },
+            {
+              "name": "Cosmos:Key",
+              "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseName')),'2019-08-01').primaryMasterKey]"
+            },
+            {
+              "name": "DataLake:ServiceName",
+              "value": "[variables('adlsName')]"
+            },
+            {
+              "name": "ApplicationInsights:InstrumentationKey",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightName')), '2015-05-01').InstrumentationKey]"
             }
+
           ]
         }
       },
@@ -632,6 +665,38 @@
             {
               "name": "WEBSITE_NODE_DEFAULT_VERSION",
               "value": "10.14.1"
+            },
+            {
+              "name": "Storage:AccountName",
+              "value": "[variables('storageName')]"
+            },
+            {
+              "name": "Storage:AccountKey",
+              "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')),'2015-05-01-preview').key1]"
+            },
+            {
+              "name": "Search:ServiceName",
+              "value": "[variables('searchName')]"
+            },
+            {
+              "name": "Search:Key",
+              "value": "[listAdminKeys(resourceId('Microsoft.Search/searchServices/', variables('searchName')), '2015-08-19').PrimaryKey]"
+            },
+            {
+              "name": "Cosmos:ServiceName",
+              "value": "[variables('databaseName')]"
+            },
+            {
+              "name": "Cosmos:Key",
+              "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseName')),'2019-08-01').primaryMasterKey]"
+            },
+            {
+              "name": "DataLake:ServiceName",
+              "value": "[variables('adlsName')]"
+            },
+            {
+              "name": "ApplicationInsights:InstrumentationKey",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightName')), '2015-05-01').InstrumentationKey]"
             }
           ]
         }
@@ -786,6 +851,22 @@
     }
   ],
   "outputs": {
+    "AzureStorage":{
+      "type": "string",
+      "value": "[concat('Account Storage Name: ',variables('storageName'),' Key: ', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')),'2015-05-01-preview').key1)]"
+    },
+    "AzureSearch":{
+      "type": "string",
+      "value": "[concat('Account Search Name: ',variables('searchName'),' Key: ', listAdminKeys(resourceId('Microsoft.Search/searchServices/', variables('searchName')), '2015-08-19').PrimaryKey)]"
+    },
+    "AzureCosmos":{
+      "type": "string",
+      "value": "[concat('Cosmos Name: ',variables('databaseName'),' Key: ', listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseName')),'2019-08-01').primaryMasterKey)]"
+    },
+    "AzureDataLake":{
+      "type": "string",
+      "value": "[concat('Data Lake Name: ',variables('adlsName'))]"
+    },
     "curlCmdAzFunction1": {
       "type": "string",
       "value": "[concat('curl -d \"{\\\"param1\\\":\\\"0123456789\\\",\\\"param2\\\":\\\"abcdef\\\"}\" -H \"Content-Type: application/json\"  -X POST   \"https://',variables('azFunctionName'),'.azurewebsites.net/api/HttpTriggerPythonFunction\"')]"
